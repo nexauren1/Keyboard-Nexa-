@@ -33,18 +33,21 @@ jobs:
       - name: Verify APK
         run: test -f app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Prepare release APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk nexa-keyboard.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: nexa-keyboard-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: nexa-keyboard.apk
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="v1.0.${{ github.run_number }}"
+          VERSION="v${{ github.run_number }}"
           gh release create "$VERSION" \
-            app/build/outputs/apk/debug/app-debug.apk \
+            nexa-keyboard.apk \
             --title "Nexa Keyboard $VERSION" \
             --generate-notes
