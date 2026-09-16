@@ -42,12 +42,18 @@ jobs:
           name: nexa-keyboard-debug
           path: nexa-keyboard.apk
 
-      - name: Create GitHub Release
+      - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="v${{ github.run_number }}"
-          gh release create "$VERSION" \
-            nexa-keyboard.apk \
-            --title "Nexa Keyboard $VERSION" \
-            --generate-notes
+          VERSION=$(grep 'versionName' app/build.gradle.kts | sed 's/.*versionName = "\([^"]*\)".*/\1/')
+          TAG="v${VERSION}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" nexa-keyboard.apk --clobber
+          else
+            gh release create "$TAG" \
+              nexa-keyboard.apk \
+              --title "Nexa Keyboard $TAG" \
+              --generate-notes
+          fi
